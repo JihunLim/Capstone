@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>KakaoIX_임지훈(940204)</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Kakao IX 과제제출 (임지훈_940204)">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/bootstrap4/bootstrap.min.css}">
+    <link th:href= "@{/plugins/font-awesome-4.7.0/css/font-awesome.min.css}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/owl.carousel.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/owl.theme.default.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/animate.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/main_styles.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/responsive.css}">
+    <style>
+        * {box-sizing: border-box}
+
+        /* Add padding to containers */
+        .container {
+            padding: 16px;
+        }
+
+        /* Full-width input fields */
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0 22px 0;
+            display: inline-block;
+            border: none;
+            background: #f1f1f1;
+        }
+
+        input[type=text]:focus, input[type=password]:focus {
+            background-color: #ddd;
+            outline: none;
+        }
+
+        /* Overwrite default styles of hr */
+        hr {
+            border: 1px solid #f1f1f1;
+            margin-bottom: 25px;
+        }
+
+        /* Set a style for the submit/register button */
+        .registerbtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            opacity: 0.9;
+        }
+
+        .registerbtn:hover {
+            opacity:1;
+        }
+
+        /* Add a blue text color to links */
+        a {
+            color: dodgerblue;
+        }
+
+        /* Set a grey background color and center the text of the "sign in" section */
+        .signin {
+            background-color: #f1f1f1;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="super_container" id="signupform">
+
+    <form role="form" action="/" th:action="@{/registration}" th:object="${users}" th:method="post">
+        <div class="container">
+            <h3><a href="/">Home</a></h3><hr style="border-width: thick; border-color: #1e7e34;">
+            <h1>회원가입</h1>
+            <p>회원정보를 입력해주세요. 모두 입력하셔야 가입이 가능합니다.</p>
+            <hr style="border-width: revert; border-color: #8a8a8a;">
+            <label for="user_name"><b>이름 </b></label>
+            <input type="text" placeholder="이름을 입력해주세요"  id="user_name" name="user_name" autofocus="autofocus" required>
+
+
+            <label for="user_id"><b>ID &nbsp;&nbsp;</b></label>
+            <span id="successCreateId" style="color:green;"></span>
+            <span id="failCreateId" style="color:red;"></span>
+            <input type="text" onkeydown="fn_press_han(this);" placeholder="ID를 입력해주세요"  id="user_id" name="user_id" required>
+
+            <label for="user_pwd"><b>비밀번호  &nbsp;&nbsp;</b></label>
+            <span id="failCreatePwd" style="color:green;">영문, 숫자를 혼합하여 6~20자로 만들어주세요.</span>
+            <input type="password" placeholder="비밀번호를 입력해주세요"  id="user_pwd" name="user_pwd" required>
+
+            <label for="user_pwd_repeat"><b>비밀번호 확인 &nbsp;&nbsp;</b></label>
+            <span id="MissmatchCreatePwd" style="color:red;"></span>
+            <input type="password" placeholder="비밀번호를 다시 한번 입력해주세요" id="user_pwd_repeat" name="user_pwd_repeat" required>
+
+            <label for="user_birth"><b>생년월일 </b></label>
+            <input type="text" placeholder="ex) 1994.02.04" id="user_birth" name="user_birth" required>
+
+            <label for="user_email"><b>이메일 </b></label>
+            <input type="text" placeholder="이메일을 입력해주세요"  id="user_email" name="user_email" required>
+
+            <label for="user_phone"><b>전화번호 </b></label>
+            <input type="text" placeholder="휴대폰 번호" id="user_phone" name="user_phone" required>
+
+            <input type="hidden" name="user_enabled" value="1">
+            <input type="hidden" name="user_role" value="ROLE_USER">
+
+            <hr>
+
+            <button type="submit" class="registerbtn" id="submit" >완료</button>
+        </div>
+
+        <div class="container signin">
+            <p>이미 계정이 있으신가요?  <a th:href="@{/login}">로그인하기</a>.</p>
+        </div>
+    </form>
+
+</div>
+<script src="//code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript">
+
+    /*
+     * checkId : 중복없으면  true, 중복되면 false.
+     * checkPwd : 조건에 맞으면 true, 안맞으면 false.
+     * isMatchPwd : 비번 칸 두개를 확인하여 같으면 true, 안같으면 false.
+    */
+    var checkId = true;
+    var checkPwd = true;
+    var isMatchPwd = true;
+
+    //중독된 아이디 검사
+    $('#signupform').on("blur", "#user_id", function(){
+        if($.trim($('#user_id').val()) == ""){
+            checkId=false;
+            //text
+            $('#successCreateId').text("");
+            $('#failCreateId').text("ID를 입력해주세요.");
+            return;
+        }else if(!chkId($.trim($('#user_id').val()))){
+            checkId = false;
+            $('#successCreateId').text("");
+            $('#failCreateId').text("ID는 영문으로 최소 6자 이상이어야 합니다.");
+            return;
+        }
+        //아이디 사용가능 여부 확인
+        $.ajax({
+            type: 'post',
+            url: "user/id_check",
+            cache: false,
+            async: true,
+            data: { "user_id":$.trim($("#user_id").val()) },
+            success: function(msg, xhr){
+                if(msg == false) { //id중복으로 사용 불가
+                    checkId=false;
+                    $('#successCreateId').text("");
+                    $('#failCreateId').text("이미 사용중인 ID입니다.");
+                }else{
+                    checkId=true; //id사용 가능
+                    $('#failCreateId').text("");
+                    $('#successCreateId').text("사용이 가능한 ID입니다.");
+                }
+            },
+            error:function(msg, xhr){
+                //통신 중 오류발생
+            }
+        });
+    });
+
+    //비밀번호 일치여부 확인
+    $('#signupform').on("blur", "#user_pwd_repeat", function(){
+        if($.trim($('#user_pwd').val())=="" || $.trim($('#user_pwd_repeat').val())==""){
+            isMatchPwd=false; //비번 미완성
+            return ;
+        }
+        if($.trim($('#user_pwd').val()) == $.trim($('#user_pwd_repeat').val()) ){
+            isMatchPwd = true; //비번 같음
+            $('#MissmatchCreatePwd').text("");
+        }else{
+            isMatchPwd = false; //두개의 비번이 같지 않음
+            $('#MissmatchCreatePwd').text("비밀번호가 일치하지 않습니다.");
+        }
+    });
+
+    function chkPwd(str){
+        //영문 숫자 혼합하여 6~20자
+        var reg_pwd = /^.*(?=.{6,20})(?=.*[0-9])(?=.*[a-zA-Z]).*$/;
+        if(!reg_pwd.test(str)){
+            return false;
+        }
+        return true;
+    }
+
+    function chkId(str){
+        //영문 사용하여 6~20자
+        var reg_id = /^.*(?=.{6,50})(?=.*[a-zA-Z]).*$/;
+        if(!reg_id.test(str)){
+            return false;
+        }
+        return true;
+    }
+
+    //비밀번호 조건 확인
+    $('#signupform').on("blur", "#user_pwd", function(){
+        if(!chkPwd( $.trim($('#user_pwd').val()))){
+            checkPwd = false;
+            $('#failCreatePwd').css("color","red"); //비번조건 빨간색으로 변경
+        }else{
+            checkPwd = true;
+            $('#failCreatePwd').css("color","green"); //비번조건 초록색으로 변경
+        }
+
+    });
+
+
+    $('#signupform').on("click", "#submit", function(){
+        if(!checkId) {
+            alert("ID를 확인해주세요.");
+            return false;
+        }else if(!checkPwd){
+            alert("비밀번호를 확인하세요.\n(영문, 숫자를 혼합하여 6~20자 이내)");
+            return false;
+        }else if(!isMatchPwd){
+            alert("비밀번호가 일치하지 않습니다. ");
+            return false;
+        }
+    });
+
+    /* 한글입력 방지 */
+    function fn_press_han(obj)
+    {
+        //좌우 방향키, 백스페이스, 딜리트, 탭키에 대한 예외
+        if(event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39
+            || event.keyCode == 46 ) return;
+        //obj.value = obj.value.replace(/[\a-zㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+        obj.value = obj.value.replace(/[\ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+    }
+
+</script>
+
+
+<script th:src= "@{/js/jquery-3.2.1.min.js}"></script>
+<script th:src= "@{/styles/bootstrap4/popper.js}"></script>
+<script th:src= "@{/styles/bootstrap4/bootstrap.min.js}"></script>
+<script th:src= "@{/plugins/greensock/TweenMax.min.js}"></script>
+<script th:src= "@{/plugins/greensock/TimelineMax.min.js}"></script>
+<script th:src= "@{/plugins/scrollmagic/ScrollMagic.min.js}"></script>
+<script th:src= "@{/plugins/greensock/animation.gsap.min.js}"></script>
+<script th:src= "@{/plugins/greensock/ScrollToPlugin.min.js}"></script>
+<script th:src= "@{/plugins/OwlCarousel2-2.2.1/owl.carousel.js}"></script>
+<script th:src= "@{/plugins/Isotope/isotope.pkgd.min.js}"></script>
+<script th:src= "@{/plugins/easing/easing.js}"></script>
+<script th:src= "@{/plugins/parallax-js-master/parallax.min.js}"></script>
+<script th:src= "@{/js/custom.js}"></script>
+
+
+
+</body>
+</html>

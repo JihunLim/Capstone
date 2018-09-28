@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>KakaoIX_임지훈(940204)</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="description" content="Kakao IX 과제제출 (임지훈_940204)">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" th:href= "@{/styles/bootstrap4/bootstrap.min.css}">
+	<link th:href= "@{/plugins/font-awesome-4.7.0/css/font-awesome.min.css}" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/owl.carousel.css}">
+	<link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/owl.theme.default.css}">
+	<link rel="stylesheet" type="text/css" th:href= "@{/plugins/OwlCarousel2-2.2.1/animate.css}">
+	<link rel="stylesheet" type="text/css" th:href= "@{/styles/main_styles.css}">
+	<link rel="stylesheet" type="text/css" th:href= "@{/styles/responsive.css}">
+	<style>
+		* {box-sizing: border-box}
+
+		/* Add padding to containers */
+		.container {
+			padding: 16px;
+		}
+
+		/* Full-width input fields */
+		input[type=text], input[type=password] {
+			width: 100%;
+			padding: 15px;
+			margin: 5px 0 22px 0;
+			display: inline-block;
+			border: none;
+			background: #f1f1f1;
+		}
+
+		input[type=text]:focus, input[type=password]:focus {
+			background-color: #ddd;
+			outline: none;
+		}
+
+		/* Overwrite default styles of hr */
+		hr {
+			border: 1px solid #f1f1f1;
+			margin-bottom: 25px;
+		}
+
+		/* Set a style for the submit/register button */
+		.registerbtn {
+			background-color: #4CAF50;
+			color: white;
+			padding: 16px 20px;
+			margin: 8px 0;
+			border: none;
+			cursor: pointer;
+			width: 100%;
+			opacity: 0.9;
+		}
+
+		.registerbtn:hover {
+			opacity:1;
+		}
+
+		/* Add a blue text color to links */
+		a {
+			color: dodgerblue;
+		}
+
+		/* Set a grey background color and center the text of the "sign in" section */
+		.signin {
+			background-color: #f1f1f1;
+			text-align: center;
+		}
+
+		#tab table{
+			margin : auto;
+			border : none;
+		}
+
+		#tab {
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+			border-collapse: collapse;
+			width: 100%;
+			align-content: center;
+		}
+
+		#tab td, #tab th {
+			padding: 10px;
+		}
+
+		#tab tr:nth-child(even){background-color: #f2f2f2;}
+
+
+		#tab th {
+			padding-top: 12px;
+			padding-bottom: 12px;
+			text-align: left;
+			background-color: #4CAF50;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+
+<div class="super_container">
+
+	<form id="order-form">
+		<div class="container">
+			<h3><a href="/">Home</a></h3><hr style="border-width: thick; border-color: #1e7e34;">
+			<h1><span th:text="${item.item_title}"/> 구매 페이지</h1>
+			<p><span th:text="${item.item_describe}"/></p>
+			<hr style="border-width: revert; border-color: #8a8a8a;">
+			<table id="tab">
+				<tr>
+					<td><label>상품 </label></td>
+					<td><label><b><span th:text="${item.item_title}"/></b></label></td>
+					<input type="hidden" id="order_itemserial" th:value="${item.item_serial}">
+				</tr>
+				<tr>
+					<td><label>이미지 </label></td>
+					<td>
+						<div class="product">
+							<div class="product_image"><img  th:src= "@{${item.item_imgdir}}" alt=""></div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td><label>가격 </label></td>
+					<td><label><b><span th:text="${item.item_price}"/></b></label></td>
+					<input type="hidden" id="item_price" th:value="${item.item_price}">
+				</tr>
+				<tr>
+					<td><label for="item_num">수량 </label></td>
+					<td>
+						<input type="number" id="item_num" name="item_num" value=1>
+					</td>
+				</tr>
+
+			</table>
+			<hr>
+			<button type="submit" class="registerbtn">구매하기</button>
+		</div>
+
+	</form>
+
+</div>
+
+<script src="//code.jquery.com/jquery.min.js"></script>
+<script>
+    /**
+	 *  구매 처리 ajax
+     */
+
+	$("#order-form").submit(function(e){
+        e.preventDefault(); // 동작해야 할 이벤트 중지
+        //데이터 json으로 변환
+        var price = parseInt($('#item_price').val());
+        var buynum = parseInt($('#item_num').val());
+        var totalprice = price*buynum;
+
+        var data = {
+            "order_itemserial" : parseInt($('#order_itemserial').val()),
+            "order_buynum" : buynum,
+            "order_totalprice" : totalprice
+        }
+        var json = JSON.stringify(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '/order',
+            data: json,
+            contentType : "application/json; charset=utf-8",
+            error : function(){
+                alert("구매도중 오류가 발생했습니다. 다시 시도해주십시오.");
+            },
+            success: function(msg, httpStatus){
+                if(msg.status == "loginfail"){
+                    alert("로그인 후에 이용하실 수 있습니다.");
+                    location.href = '/login';
+				}else if(msg.status == "success"){
+                    alert(msg.message);
+                    location.href = '/';
+                }else{
+                    alert("구매도중 오류가 발생했습니다. 다시 시도해주십시오.");
+				}
+            }
+        });    //end ajax
+
+	});
+
+</script>
+<script th:src= "@{/js/jquery-3.2.1.min.js}"></script>
+<script th:src= "@{/styles/bootstrap4/popper.js}"></script>
+<script th:src= "@{/styles/bootstrap4/bootstrap.min.js}"></script>
+<script th:src= "@{/plugins/greensock/TweenMax.min.js}"></script>
+<script th:src= "@{/plugins/greensock/TimelineMax.min.js}"></script>
+<script th:src= "@{/plugins/scrollmagic/ScrollMagic.min.js}"></script>
+<script th:src= "@{/plugins/greensock/animation.gsap.min.js}"></script>
+<script th:src= "@{/plugins/greensock/ScrollToPlugin.min.js}"></script>
+<script th:src= "@{/plugins/OwlCarousel2-2.2.1/owl.carousel.js}"></script>
+<script th:src= "@{/plugins/Isotope/isotope.pkgd.min.js}"></script>
+<script th:src= "@{/plugins/easing/easing.js}"></script>
+<script th:src= "@{/plugins/parallax-js-master/parallax.min.js}"></script>
+<script th:src= "@{/js/custom.js}"></script>
+
+
+
+</body>
+</html>

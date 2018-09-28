@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.capstone.precare.mapper.UsersMapper">
+
+    <!-- 모든 사용자 정보 반환-->
+    <select id="getUserList" resultType="Users">
+        SELECT * FROM users
+    </select>
+
+    <!-- 사용자 생성하기(회원가입) -->
+    <insert id="insertUserDao" parameterType="com.capstone.precare.model.Users">
+        insert into users values (#{user_id},#{user_pwd},default,default,#{user_email},#{user_birth},#{user_name},#{user_phone});
+    </insert>
+
+    <!-- 사용자 id로 사용자 정보 찾기 -->
+    <select id="findUserByUserId" parameterType="String" resultType="Users">
+        Select * from users where user_id = #{user_id};
+    </select>
+
+    <!-- 사용자 아이디 중복 확인하기 -->
+    <select id="checkUserId" resultType="int">
+   	SELECT count(*) FROM users where user_id = #{param1};
+   </select>
+
+
+</mapper>
