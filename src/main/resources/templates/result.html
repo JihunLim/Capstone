@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html>
+<head>
+    <title>KakaoIX_임지훈(940204)</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Kakao IX 과제제출 (임지훈_940204)">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/bootstrap.min.css}">
+    <link th:href= "@{/styles/fancybox/jquery.fancybox.css}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/jcarousel.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/flexslider.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/style.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/default.css}">
+    <link rel="stylesheet" type="text/css" th:href= "@{/styles/main.css}">
+
+</head>
+<body class="homepage">
+<div id="wrapper">
+    <!-- start header -->
+    <header>
+        <div class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" th:href="@{/}"><span>P</span>recare</a>
+                </div>
+                <div class="navbar-collapse collapse ">
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle " data-toggle="dropdown" data-hover="dropdown" data-delay="0" data-close-others="false"><div sec:authentication="name"><span> utaut님</span></div> <b class=" icon-angle-down"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a th:href="@{/logout}"><div>로그아웃</div></a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- end header -->
+</div>
+
+<div id="page-wrapper">
+
+    <!-- Header -->
+    <div id="header">
+
+
+    </div>
+
+    <!-- Banner -->
+    <div class="wrapper style1" style="background-color: #D8D8D8; background-repeat:no-repeat;">
+        <section id="features" class="container special" >
+            <header>
+                <h2><span th:text="${userinfo.user_name}"></span></strong>님의 최근 검사결과</h2>
+                <p>
+                    <!-- 예측된 결과가 없을 경우 -->
+                    <span th:if="${prediction_count} <= 0">
+                        <h2>검사를 진행해주시기 바랍니다.</h2>
+                    </span>
+                    <!-- 예측된 결과가 있을 경우 -->
+                    <span th:if="${prediction_count} > 0">
+                        <span th:if="${target_prediction.pre_result} == 'yes'">
+                            <h2>Recently, you have been suffering from <span style="color: blue;"><strong>${target_prediction.pre_sort}</strong></span>.</h2>
+                        </span>
+                        <span th:if="${target_prediction.pre_result} == 'no'">
+                            <h2>Congratulations! You are mentally sound great without <strong><span color="blue">${target_prediction.pre_sort}</span></strong>.</h2>
+                        </span>
+                    </span>
+                </p>
+            </header>
+        </section>
+    </div>
+
+    <!-- Main -->
+    <div>
+        <section id="banner">
+            <article id="main" class="container special">
+                <header>
+                    <h2>Past Prediction Results</h2>
+                </header>
+                <table width="800" cellpadding="0" cellspacing="0" border="1">
+                    <thead>
+                    <tr style="background: #eee; border-bottom: 3px inset #ccc;" >
+                        <th>date</th>
+                        <th>survey title</th>
+                        <th>result</th>
+                        <th>Severity</th>
+                        <th>survey content</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody th:if="${not #lists.isEmpty(prediction_list)}" th:each="dto:${prediction_list}">
+                        <tr style="text-align:center;cursor:pointer;" onclick="javascript:go2PostWithResult('${dto.pre_id}', '${dto.pre_userId}');" class="highlight">
+                            <td style="border-right: 1px solid #ccc;border-left: 0px solid #ccc;">${dto.pre_date}</td>
+                            <td>${dto.pre_sort}</td>
+                            <td>${dto.pre_result}</td>
+                            <!-- result가 no면 없음, result가 yes면 -> 가능성이 30아래면 약, 60아래면 중, 100아래면 상 -->
+                            <span th:if="${dto.pre_result} == 'no'">
+                                <td>-</td>
+                            </span>
+
+                            <span th:if="${dto.pre_result} == 'yes'">
+                                <span th:if="${dto.pre_probability} <= 30">낮음</span>
+                                <span th:if="${dto.pre_probability} > 30 && ${dto.pre_probability} <= 60">중간</span>
+                                <span th:if="${dto.pre_probability} > 60 && ${dto.pre_probability} <= 100">높음</span>
+                            </span>
+
+                            <td><a href="#" class="skel-layers-ignoreHref"><span class="icon fa-file-text"></span></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </section>
+
+    </div>
+
+    <!-- Features -->
+    <div id= "cure" class="wrapper style1">
+
+        <section id="features" class="container special">
+            <!-- None -->
+            <!-- 예측된 결과가 없을 경우 -->
+
+
+            <span th:if="${prediction_count} <= 0">
+                <header>
+                    <h2 style="color: black;"> Helpful Solutions for <strong style="color: black;"><span th:text="${userinfo.user_name}"/></strong></h2>
+                </header>
+                <p align="center" style="text-align:center;">
+                    <iframe src="https://www.youtube.com/embed/sKTzZe52nB0" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                </p>
+                <p>You haven't completed the survey yet but, it’s important to take care of yourself and get the most from life. Below are 7 practical ways to look after your mental health. Making simple changes to how you live doesn’t need to cost a fortune or take up loads of time. Anyone can follow this advice. Why not start today?<p />
+                <ul><strong>Talking about your feelings can help you stay in good mental health and deal with times when you feel troubled.</strong></ul>
+                <li><strong>Regular exercise can boost your self-esteem and can help you concentrate,</strong></li>
+                <li><strong>Your brain needs a mix of nutrients in order to stay healthy and function well,</strong></li>
+                <li><strong>Drink sensibly. Drinking is not a good way to manage difficult feelings.</strong></li>
+                <li><strong>None of us are superhuman. We all sometimes get tired or overwhelmed by how we feel or when things don’t go to plan.</strong></li>
+                <li><strong>A change of scene or a change of pace is good for your mental health</strong></li>
+                <li><strong>Enjoying yourself can help beat stress. Doing an activity you enjoy probably means you’re good at it,</strong></li><br />
+                <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.mentalhealth.org.uk/publications/how-to-mental-health" target="_blank">Mental Health Foundation</a>
+            </span>
+
+            <!-- 예측된 결과가 있을 경우 -->
+            <span th:if="${prediction_count} > 0">
+                <span th:if="${target_prediction.pre_result} == 'yes'">
+                    <span th:if="${target_prediction.pre_sort} == 'Depression'">
+                        <p align="center" style="text-align:center;">
+                                <iframe src="https://www.youtube.com/embed/xKJxxq74c-8" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                            </p>
+                            <p>Depression drains your energy, hope, and drive, making it difficult to take the steps that will help you to feel better. But while overcoming depression isn’t quick or easy, it’s far from impossible. You can’t just will yourself to “snap out of it,” but you do have more control than you realize—even if your depression is severe and stubbornly persistent. The key is to start small and build from there. Feeling better takes time, but you can get there by making positive choices for yourself each day.<p />
+
+                            <ul><strong>There are some tips to overcome depression.</strong></ul>
+                            <li><strong>Look for support from people who make you feel safe and cared for.</strong></li>
+                            <li><strong>Make face-time a priority.</strong></li>
+                            <li><strong>Try to keep up with social activities even if you don’t feel like it. </strong></li>
+                            <li><strong>Find ways to support others.</strong></li>
+                            <li><strong>Care for a pet.</strong></li>
+                            <li><strong>Join a support group for depression.</strong></li><br />
+                            <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.helpguide.org/articles/depression/coping-with-depression.htm" target="_blank">HELPGUIDE.ORG</a>
+                    </span>
+                    <span th:if="${target_prediction.pre_sort} == 'Panic disorder'">
+                        <p align="center" style="text-align:center;">
+                            <iframe src="https://www.youtube.com/embed/PCjsCeszgSg" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                        </p>
+                        <p>Panic attacks are terrifying and debilitating, and they can happen to anyone. There's usually not much you can do other than wait it out, but these are the tricks some people have found helpful — physically, emotionally, or otherwise — for dealing with panic attacks.<p />
+
+                        <ul><strong>Listen to songs that will help you control your breathing rhythm.</strong></ul>
+                        <li><strong>Play with a toy that engages your senses.</strong></li>
+                        <li><strong>Count five things you can see, four you can touch, three you can hear, two you can smell, and one you can taste.</strong></li>
+                        <li><strong>Just visualize doing yoga if you're not physically able to.</strong></li>
+                        <li><strong>Play with silly putty.</strong></li>
+                        <li><strong>Have a mantra that you can repeat as you ride out an attack, like "This is not going to kill me."</strong></li>
+                        <li><strong>Concentrate on a funny cartoon when you feel an attack coming on.</strong></li><br />
+                        <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.buzzfeed.com/annaborges/panic-attacks-at-the-disco?utm_term=.dsbBmzBy7#.jbNNDMNbB" target="_blank">BuzzFeeD</a>
+                    </span>
+                    <span th:if="${target_prediction.pre_sort} == 'Personality disorder'">
+                        <p align="center" style="text-align:center;">
+                            <iframe src="https://www.youtube.com/embed/4E1JiDFxFGk" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                        </p>
+                        <p>You might be diagnosed with a personality disorder if you have difficulties with how you think and feel about yourself and other people, and are having problems in your life as a result.<p />
+                        <p>Having personality disorder is like the emotional version of being a burn victim. Everything in the world hurts more than it seems to for everyone else and any 'thick skin' you are supposed to have just isn't there.</p>
+
+                        <ul><strong>Talk to someone. It can be hard to reach out when you’re not feeling well, but it might help to share difficult thoughts.</strong></ul>
+                        <li><strong>Keep a mood diary. You could also make a note of what's going well.</strong></li>
+                        <li><strong>Plan for difficult times. If you're feeling less well you might not be able to tell people what help you want, so it could be helpful to plan ahead.</strong></li>
+                        <li><strong>Make a self-care box. You could put together some things that might help you when you’re struggling – a bit like making a first-aid kit for your mental health.</strong></li><br />
+                        <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.mind.org.uk/information-support/types-of-mental-health-problems/borderline-personality-disorder-bpd/self-care-for-bpd/#.WmdEbahl-Uk" target="_blank">MIND</a>
+                    </span>
+                    <span th:if="${target_prediction.pre_sort} == 'Inmsomnia'">
+                        <p align="center" style="text-align:center;">
+                            <iframe src="https://www.youtube.com/embed/s3vaI15ICQg" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                        </p>
+                        <p>Getting a good night’s sleep may seem like an impossible goal when you’re wide awake at 3 a.m., but you have much more control over the quality of your sleep than you probably realize. Just as how you feel during your waking hours often hinges on how well you sleep at night, so the cure for sleep difficulties can often be found in your daily routine.<p />
+                        <p>Unhealthy daytime habits and lifestyle choices can leave you tossing and turning at night and adversely affect your mood, brain and heart health, immune system, creativity, vitality, and weight. But by experimenting with the following tips to find the ones that work best for you, you can enjoy better sleep at night, improve your mental and physical health, and improve how you think and feel during the day.</p>
+
+                        <ul><strong>Keep in sync with your body's natural sleep-wake cycle.</strong></ul>
+                        <li><strong>Expose yourself to bright sunlight in the morning.</strong></li>
+                        <li><strong>Exercise during the day.</strong></li>
+                        <li><strong>Be smart about what you eat and drink such as limitting caffeine and nicotine.</strong></li>
+                        <li><strong>Wind down and clear your head.</strong></li>
+                        <li><strong>Keep your room dark, cool, and quiet.</strong></li>
+                        <li><strong>Learn ways to get back to sleep.</strong></li><br />
+                        <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.helpguide.org/articles/sleep/getting-better-sleep.htm" target="_blank">HELPGUIDE.ORG</a>
+                    </span>
+                    <span th:if="${target_prediction.pre_sort} == 'Internet addiction'">
+                        <p align="center" style="text-align:center;">
+                            <iframe src="https://www.youtube.com/embed/vOSYmLER664" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                        </p>
+                        <p>Too much time spent online can cause a host of emotional and physical problems, damage personal relationships, and decrease performance at work or school. Nevertheless, Internet addiction is a growing issue. However, if you are struggling with the problem, you can overcome it by taking steps to limit your Internet usage, filling your time with alternative activities, and seeking support.<p />
+
+                        <ul><strong>Develop a personal inventory of things Internet addiction is keeping you from.</strong></ul>
+                        <li><strong>You can and should decide on an appropriate amount of time to set aside for personal Internet usage.</strong></li>
+                        <li><strong>If Internet usage is taking up too much of your time, you can block the problem by filling your schedule with alternative activities.</strong></li>
+                        <li><strong>Having someone or something interrupt your Internet use can be very effective.</strong></li>
+                        <li><strong>Internet addiction can be curtailed if online activities are put in perspective in comparison with the rest of your life.</strong></li>
+                        <li><strong>Abstain from any particular problem apps, sites, and habits.</strong></li>
+                        <li><strong>Creating visual reminders your Internet addiction and your determination to stop it can be a powerful way of cutting back time spent online.</strong></li><br />
+                        <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.wikihow.com/Overcome-Internet-Addiction" target="_blank">WikiHow</a>
+                    </span>
+                </span>
+                <span th:if="${target_prediction.pre_result} == 'no'">
+                    <p align="center" style="text-align:center;">
+                    <iframe src="https://www.youtube.com/embed/sKTzZe52nB0" width="640" height="320" frameborder="0" allowfullscreen=""></iframe>
+                    </p>
+                    <p>Congratulations! It is amazing to keep a good mental health in modern society.<p>
+                    <p>It’s important to take care of yourself and get the most from life. Below are 7 practical ways to look after your mental health. Making simple changes to how you live doesn’t need to cost a fortune or take up loads of time. Anyone can follow this advice. Why not start today?<p />
+
+                    <ul><strong>Talking about your feelings can help you stay in good mental health and deal with times when you feel troubled.</strong></ul>
+                    <li><strong>Regular exercise can boost your self-esteem and can help you concentrate,</strong></li>
+                    <li><strong>Your brain needs a mix of nutrients in order to stay healthy and function well,</strong></li>
+                    <li><strong>Drink sensibly. Drinking is not a good way to manage difficult feelings.</strong></li>
+                    <li><strong>None of us are superhuman. We all sometimes get tired or overwhelmed by how we feel or when things don’t go to plan.</strong></li>
+                    <li><strong>A change of scene or a change of pace is good for your mental health</strong></li>
+                    <li><strong>Enjoying yourself can help beat stress. Doing an activity you enjoy probably means you’re good at it,</strong></li><br />
+                    <span class="icon fa-paper-plane"></span>Referenced Web-page : <a href="https://www.mentalhealth.org.uk/publications/how-to-mental-health" target="_blank">Mental Health Foundation</a>
+                </span>
+            </span>
+
+            <div class="row">
+                <article class="12u 12u(mobile) special">
+                    <form method="post" action="<%=cp%>/updateComment" th:action="@{/comment}">
+                        <p>
+                        <h3 style="color: black;">Manager's Comment : </h3>
+                        <div class="row">
+                            <div class="12u$ 12u$(mobile)">
+                                <input type="hidden" name="pre_id" value="${target_prediction.pre_id}">
+                                <input type="hidden" name="target_userId" value="${target_prediction.pre_userId}">
+                                <textarea name="pre_comment" placeholder="" style="width:100%;height:200px;border-width:2px;overflow:visible;text-overflow:ellipsis;" th:readonly="${login_id} == ${userinfo.user_id}"
+                                th:text="${target_prediction?.pre_comment}">
+                                </textarea>
+                            </div>
+                        </div>
+
+                        <span th:if="${login_id != userinfo.user_id}">
+                            <footer>
+                                <input type="submit" value="Submit" style="background: #0FAAB2; float:right;"/>
+                            </footer>
+                        </span>
+
+                    </form>
+                </article>
+
+            </div>
+        </section>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="<%=cp%>/resources/assets/js/jquery.min.js"></script>
+<script src="<%=cp%>/resources/assets/js/jquery.dropotron.min.js"></script>
+<script src="<%=cp%>/resources/assets/js/jquery.scrolly.min.js"></script>
+<script src="<%=cp%>/resources/assets/js/jquery.onvisible.min.js"></script>
+<script src="<%=cp%>/resources/assets/js/skel.min.js"></script>
+<script src="<%=cp%>/resources/assets/js/util.js"></script>
+<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+<script src="<%=cp%>/resources/assets/js/main.js"></script>
+<script src="<%=cp%>/resources/assets/js/youtubeWrapper.js"></script>
+<script>
+    function go2Post(value){
+        var form = document.createElement("form");
+
+        form.action = "showResult";
+        form.method = "post";
+
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("name", "user_id");
+        hiddenField.setAttribute("value", document.getElementsByName('userId')[0].value);
+        //hiddenField.setAttribute("value", value);
+        form.appendChild(hiddenField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+<script>
+    function go2PostWithComment(){
+        var form = document.createElement("form");
+
+        form.action = "updateComment";
+        form.method = "post";
+
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("name", "comment");
+        hiddenField.setAttribute("value", document.getElementsByName('comment')[0].value);
+
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("type", "hidden");
+        hiddenField2.setAttribute("name", "pre_id");
+        hiddenField2.setAttribute("value", "${prediction_list[0].pre_comment}");
+
+        form.appendChild(hiddenField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+<script>
+    function go2PostWithResult(value, value2){
+        var form = document.createElement("form");
+
+        form.action = "showResult";
+        form.method = "post";
+
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("name", "target_preId");
+        hiddenField.setAttribute("value", value);
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("type", "hidden");
+        hiddenField2.setAttribute("name", "user_id");
+        hiddenField2.setAttribute("value", value2);
+        form.appendChild(hiddenField);
+        form.appendChild(hiddenField2);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+
+
+
+
+
+
+</body>
+
+</html>
